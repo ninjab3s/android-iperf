@@ -3,7 +3,8 @@ MAINTAINER KnightWhoSayNi (threeheadedknight@protonmail.com)
 
 RUN apt-get update -qq && \
     apt-get -y upgrade -qq
-RUN apt-get install -y make bash git unzip wget curl openjdk-8-jdk build-essential autoconf nano tree
+RUN apt-get install -y make bash git unzip wget curl openjdk-8-jdk build-essential nano tree
+RUN apt-get remove -y autoconf
 
 ENV ANDROID_SDK_VERSION 4333796
 ENV ANDROID_SDK_HOME /opt/android-sdk
@@ -42,6 +43,21 @@ RUN apt-get clean
 RUN mkdir -p /tmp/jni
 COPY /jni/Android.mk /tmp/jni
 COPY /jni/Application.mk /tmp/jni
+
+# m4
+RUN cd /tmp && \
+    wget http://ftp.gnu.org/gnu/m4/m4-1.4.9.tar.gz && \
+    tar -xvf m4-1.4.9.tar.gz && \
+    cd m4-1.4.9 && \
+    ./configure && make && make install
+
+# Autoconf
+RUN cd /tmp && \
+    wget --no-check-certificate -q http://ftp.gnu.org/gnu/autoconf/autoconf-2.71.tar.xz && \
+    tar -xvf autoconf-2.71.tar.xz && \
+    cd autoconf-2.71 && \
+    ./configure && make && make install
+
 
 # iPerf 2.0.5
 
@@ -111,7 +127,6 @@ RUN cd /tmp/iperf-2.0.13 && \
 COPY /iperf-2.0.13/config.h /tmp/iperf-2.0.13
 
 # iPerf 3.1.6
-
 RUN cd /tmp && \
     wget --no-check-certificate -q https://downloads.es.net/pub/iperf/iperf-3.1.6.tar.gz && \
     tar -zxvf iperf-3.1.6.tar.gz && \
@@ -244,10 +259,15 @@ RUN cd /tmp/iperf-3.8.1 && \
 
 # iPerf 3.9
 
+#RUN cd /tmp && \
+#    wget --no-check-certificate -q https://downloads.es.net/pub/iperf/iperf-3.9.tar.gz && \
+#    tar -zxvf iperf-3.9.tar.gz && \
+#    rm -f iperf-3.9.tar.gz
+
 RUN cd /tmp && \
-    wget --no-check-certificate -q https://downloads.es.net/pub/iperf/iperf-3.9.tar.gz && \
-    tar -zxvf iperf-3.9.tar.gz && \
-    rm -f iperf-3.9.tar.gz
+    git clone https://github.com/ninjab3s/iperf iperf-3.9 && \
+    cd iperf-3.9 && \
+    git checkout android_tmp_dir
 
 COPY /iperf-3.9/Android.mk /tmp/iperf-3.9
 RUN cd /tmp/iperf-3.9 && \
